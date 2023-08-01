@@ -1,38 +1,20 @@
-# create-svelte
+# CodeBallad
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+This is a fun remake project for my university final project.
 
-## Creating a project
+## About my first version of CodeBallad
 
-If you're seeing this, you've probably already done this step. Congrats!
+That time I tried to built everything from scratch and that was a mistake. A cluncky PHP Homemade framework with phaser. But it works fine.
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+CodeBallad was a game that help you lear code, or that was how it should be. The idea was a battle bot kinda game, so the player made an algorithm using a fine tuned keyword subset of javascript like punch or kick additional action function.
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+Target for the project is conducting research on how gamification can affect learning programming.
 
-## Developing
+## My plan for the remake
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+The wolfensvelte project on sveltehack was awesome. snuffyDev was makin a 3D game only using a html element with no canvas or webgl.
+That as inspiration my stack is decided to sveltekit. I found that svelte tween and animation would be enough to do the game effect.
 
-```bash
-npm run dev
+## Game Play
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+So there is a board with minimal of 3x3. Like the old one, there is a player character and enemy. Player will create a sequence of order for the character to defeat all the enemy. A sequence can be grouped as a function, and player can code many function. Function can be run many times too and can be used in next battle or level. Enemy will have his own function or algorithm.
