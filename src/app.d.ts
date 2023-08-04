@@ -6,6 +6,13 @@ declare global {
 		// interface Locals {}
 		// interface PageData {}
 		// interface Platform {}
+
+		type Tile = {
+			x: number;
+			y: number;
+			xPos: number;
+			yPos: number;
+		};
 	}
 }
 
