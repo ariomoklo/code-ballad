@@ -14,13 +14,17 @@ declare global {
 			yPos: number
 		};
 
+		type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
+
 		type Chara = {
-			xtile: number
-			ytile: number
-			visibility: boolean
-			moveLimit: number
-			attackRange: number
-		}
+			xtile: number;
+			ytile: number;
+			visible: boolean;
+			moveLimit: number;
+			attackRange: number;
+			onAttactState?: Direction;
+			onBoardArea?: boolean;
+		};
 	}
 }
 
