@@ -3,9 +3,26 @@
 import { error } from '@sveltejs/kit';
 import { get, writable, type Writable } from 'svelte/store';
 
+type TileMap = { x: number; y: number };
+const tileToString = (tile: TileMap) => `${tile.x}.${tile.y}`;
+function generateTileMapArray(areaSize: number): TileMap[] {
+	const tilemap: { x: number; y: number }[] = [];
+	for (let x = 0; x < areaSize; x++) {
+		for (let y = 0; y < areaSize; y++) {
+			tilemap.push({ x, y });
+		}
+	}
+	return tilemap;
+}
+
 type Movement = (space?: number) => void;
 type CharacterMovement = { up: Movement; down: Movement; left: Movement; right: Movement };
-function moveCharacter(areaSize: number, character: Writable<App.Chara>): CharacterMovement {
+function moveCharacter(
+	areaSize: number,
+	character: Writable<App.Chara>,
+	blockedTiles: Writable<string[]>
+): CharacterMovement {
+	const blocked = get(blockedTiles);
 	const char = get(character);
 	const size = areaSize - 1;
 
@@ -22,11 +39,27 @@ function moveCharacter(areaSize: number, character: Writable<App.Chara>): Charac
 		// set space to movelimit if player to eager to move character
 		if (moveLimit > space) space = moveLimit;
 
+		// destination must not exceeding area limit
 		const areaLimit = direction < 0 ? 0 : size;
 		let destination = currentTile + space * direction;
 		if (direction < 0 && destination < areaLimit) destination = areaLimit;
 		if (direction > 0 && destination > areaLimit) destination = areaLimit;
 
+		// setup destinationTile for use
+		const destinationTile = { x: char.xtile, y: char.ytile };
+		if (axis === 'xtile') destinationTile.x = destination;
+		else destinationTile.y = destination;
+
+		// find if destination tile is used or blocked
+		if (blocked.includes(tileToString(destinationTile))) return;
+
+		// update character position in blocked tiles
+		const charDepartureTileIndex = blocked.findIndex(
+			(p) => p === tileToString({ x: char.xtile, y: char.ytile })
+		);
+		blocked.splice(charDepartureTileIndex, 1, tileToString(destinationTile));
+
+		// update character position
 		character.update((char) => {
 			char[axis] = destination;
 			return char;
@@ -41,17 +74,6 @@ function moveCharacter(areaSize: number, character: Writable<App.Chara>): Charac
 	};
 }
 
-type TileMapArray = { x: number; y: number }[];
-function generateTileMapArray(areaSize: number): TileMapArray {
-	const tilemap: { x: number; y: number }[] = [];
-	for (let x = 0; x < areaSize; x++) {
-		for (let y = 0; y < areaSize; y++) {
-			tilemap.push({ x, y });
-		}
-	}
-	return tilemap;
-}
-
 function generateSpawnPoints(areaSize: number, total: number) {
 	if (total > areaSize * areaSize) throw error(500, 'Total spawn point is greater than area size');
 	const tilemap = generateTileMapArray(areaSize);
@@ -64,6 +86,7 @@ function generateSpawnPoints(areaSize: number, total: number) {
 
 export function useGameUtility(areaSize = 3) {
 	const characters = new Map<string, Writable<App.Chara>>();
+	const blockedTiles = writable<string[]>([]);
 	const tiles = writable<App.Tile[][]>(
 		Array(areaSize)
 			.fill(true)
@@ -96,11 +119,14 @@ export function useGameUtility(areaSize = 3) {
 		createCharacter,
 		spawn() {
 			const spawnPoints = generateSpawnPoints(areaSize, characters.size);
+			blockedTiles.set(spawnPoints.map((p) => tileToString(p)));
+
 			characters.forEach((char) => {
 				const point = spawnPoints.shift();
 				if (!point) return;
 
 				char.update((c) => {
+					c.visibility = false;
 					c.xtile = point.x;
 					c.ytile = point.y;
 					return c;
@@ -116,7 +142,7 @@ export function useGameUtility(areaSize = 3) {
 		},
 		move(characterID: string): CharacterMovement {
 			const chara = characters.get(characterID);
-			if (chara) return moveCharacter(areaSize, chara);
+			if (chara) return moveCharacter(areaSize, chara, blockedTiles);
 			function dummy(space = 1) {
 				return;
 			}
