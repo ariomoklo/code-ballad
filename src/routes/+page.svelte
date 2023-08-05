@@ -5,18 +5,23 @@
     import { writable } from "svelte/store";
 
 
-    const row = 3
-    const column = 3
+    const areaSize = 3
 
+    let catVisibility = false
     const catPosition = writable<{ x: number, y: number }>({ x: 0, y: 0 })
     const tiles = writable<App.Tile[][]>(
-        Array(row).fill(true).map((_1, y) => {
-            const arr = Array(column).fill(true).map((_2, x) => {
+        Array(areaSize).fill(true).map((_1, y) => {
+            const arr = Array(areaSize).fill(true).map((_2, x) => {
                 const tile: App.Tile = { x, y, xPos: 0, yPos: 0 }
                 return tile
             })
             return arr
         }))
+
+    function randomSpawn() {
+        catPosition.set({ x: Math.floor(Math.random() * (areaSize-1)), y: Math.floor(Math.random() * (areaSize-1)) })
+        setTimeout(() => catVisibility = true, 500);
+    }
 
     function moveUp() {
         if ($catPosition.y > 0) {
@@ -25,7 +30,7 @@
     }
 
     function moveDown() {
-        if ($catPosition.y < 2) {
+        if ($catPosition.y < areaSize - 1) {
             catPosition.set({ x: $catPosition.x, y: $catPosition.y + 1})
         }
     }
@@ -37,19 +42,19 @@
     }
 
     function moveRight() {
-        if ($catPosition.x < 2) {
+        if ($catPosition.x < areaSize - 1) {
             catPosition.set({ x: $catPosition.x + 1, y: $catPosition.y })
         }
     }
 
     onMount(() => {
-        catPosition.set({ x: 1, y: 1 })
+        randomSpawn()
     })
 </script>
 
 <main class="flex w-screen h-screen bg-zinc-950">
     <section id="board" class="w-1/2 h-full flex relative items-center justify-center">
-        <Character {tiles} position={catPosition} />
+        <Character {tiles} position={catPosition} visibility={catVisibility} />
         <table class="table-fixed border-collapse border border-green-600">
             {#each $tiles as tileRow, y }
                 <tr>
