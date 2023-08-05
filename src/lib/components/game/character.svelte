@@ -2,13 +2,12 @@
 	import { spring } from "svelte/motion";
     import type { Writable } from "svelte/store";
 
-    export let charSize = 32
-    export let tileSize = 48
-    export let visibility = false
+    const charSize = 34
+    const tileSize = 48
     export let tiles: Writable<App.Tile[][]>
-    export let position: Writable<{ x: number, y: number }>
+    export let chara: Writable<App.Chara>
 
-    $: opacity = visibility ? 1:0
+    $: opacity = $chara.visibility ? 1:0
 
     const coord = spring(
         { x: 0, y: 0 },
@@ -19,17 +18,14 @@
         return pos + (tileSize/2) - (charSize/2) 
     }
 
-    position.subscribe(pos => {
-        const tile = $tiles[pos.x][pos.y]
+    chara.subscribe(c => {
+        const tile = $tiles[c.xtile][c.ytile]
         coord.set({ x: calcPos(tile.xPos), y: calcPos(tile.yPos) })
     })
 </script>
-<!-- <figure class="fixed inline-flex items-center justify-center" style="left: {$x}; top: {$y}">
-    <p class="text-white">{$x}, {$y}</p>
-</figure> -->
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<svg class="absolute w-full h-full">
-    <svg xmlns="http://www.w3.org/2000/svg" x={$coord.x} y={$coord.y} opacity={opacity}>
+
+<svg xmlns="http://www.w3.org/2000/svg" x={$coord.x} y={$coord.y} opacity={opacity}>
+    <slot>
         <g fill="none" width={charSize} height={charSize}><path fill="#FFB02E" d="M4 25.942C4 28.174 5.763 30 7.918 30h16.164C26.237 30 28 28.073 28 25.84V6.43c0-1.3-1.59-1.9-2.485-1L20.974 10h-9.812L6.5 5.43c-.9-.9-2.5-.3-2.5 1v19.512Z"/><path fill="#FF822D" d="m9 10.927l-2.8 2.6c-.5.5-1.4.1-1.4-.6v-5.2c0-.6.9-1 1.4-.5l2.8 2.6c.3.3.3.8 0 1.1Zm14.05 0l2.8 2.6c.5.5 1.4.1 1.4-.6v-5.2c0-.6-.9-1-1.4-.5l-2.8 2.6c-.3.3-.3.8 0 1.1Z"/><path fill="#F70A8D" d="M17.043 20h-2.086a.5.5 0 0 0-.353.854l1.043 1.042a.5.5 0 0 0 .707 0l1.043-1.042a.5.5 0 0 0-.354-.854Z"/><path fill="#FF6723" d="M2.724 20.053a.5.5 0 1 0-.448.894l4 2a.5.5 0 1 0 .448-.894l-4-2Zm0 6.894a.5.5 0 1 1-.448-.894l4-2a.5.5 0 1 1 .448.894l-4 2Zm27.223-6.671a.5.5 0 0 0-.67-.223l-4 2a.5.5 0 1 0 .447.894l4-2a.5.5 0 0 0 .223-.67Zm-.671 6.671a.5.5 0 1 0 .448-.894l-4-2a.5.5 0 1 0-.448.894l4 2Z"/><path fill="#402A32" d="M9.947 15.276a.5.5 0 1 0-.894.448a4.589 4.589 0 0 0 1.292 1.52A.998.998 0 0 0 10 18v1a1 1 0 1 0 2 0v-1a.94.94 0 0 0 0-.038c.16.025.327.038.5.038a.5.5 0 0 0 0-1c-.654 0-1.212-.271-1.658-.637a3.597 3.597 0 0 1-.895-1.087ZM20 18a.94.94 0 0 1 0-.038a3.34 3.34 0 0 1-.5.038a.5.5 0 1 1 0-1c.654 0 1.212-.271 1.658-.637c.45-.368.757-.811.895-1.087a.5.5 0 1 1 .894.448a4.59 4.59 0 0 1-1.292 1.52A.998.998 0 0 1 22 18v1a1 1 0 1 1-2 0v-1Zm2.5 4a.5.5 0 0 1 .5.5c0 1.569-.707 2.706-1.625 3.44c-.901.721-2.011 1.06-2.875 1.06a.5.5 0 0 1 0-1c.637 0 1.526-.261 2.25-.84c.708-.566 1.25-1.428 1.25-2.66a.5.5 0 0 1 .5-.5Z"/></g>
-    </svg>
+    </slot>
 </svg>
