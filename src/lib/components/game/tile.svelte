@@ -23,7 +23,7 @@
     });
 </script>
 
-<td bind:this={element} class="text-center w-24 h-24 border border-green-600 text-slate-700">
-    <p>{x},{y}</p>
-    <p>{position?.left.toFixed(2)},<br>{position?.top.toFixed(2)}</p>
+<td bind:this={element} class="text-center w-12 h-12 border border-green-600 text-slate-700 text-[5px]">
+    <!-- <p>{x},{y}</p>
+    <p>{position?.left.toFixed(2)},<br>{position?.top.toFixed(2)}</p> -->
 </td>
