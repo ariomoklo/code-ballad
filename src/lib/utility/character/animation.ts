@@ -1,23 +1,30 @@
 import { spring, tweened, type Spring, type Tweened } from 'svelte/motion';
-import { get, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 
 const defineBaseAnimation = (x = 0, y = 0) => ({
 	opacity: tweened(0, { duration: 100 }),
 	position: spring({ x, y }, { stiffness: 0.2, damping: 0.5 })
 });
 
-export type BaseAnimation = {
+export interface BaseAnimation {
 	opacity: Tweened<number>;
 	position: Spring<{ x: number; y: number }>;
-};
+}
+
+export interface WeaponAnimation extends BaseAnimation {
+	pointing: Writable<App.Direction>;
+}
 
 export function useCharacterAnimation(
 	character: Writable<App.Chara>,
 	tileSize = 48,
 	charSize = 34
 ) {
-	const sprite = defineBaseAnimation();
-	const weapon = defineBaseAnimation();
+	const sprite: BaseAnimation = defineBaseAnimation();
+	const weapon: WeaponAnimation = {
+		...defineBaseAnimation(),
+		pointing: writable<App.Direction>()
+	};
 
 	function _calcPosition(destination: number) {
 		return destination + tileSize / 2 - charSize / 2;
@@ -37,6 +44,7 @@ export function useCharacterAnimation(
 			const y = _calcPosition(tile.yPos);
 			sprite.position.set({ x, y });
 
+			weapon.pointing.set(chara.onAttactState ?? get(weapon.pointing));
 			if (chara.onAttactState === 'UP') {
 				weapon.position.set({ x, y: y - tileSize });
 				weapon.opacity.set(1);
