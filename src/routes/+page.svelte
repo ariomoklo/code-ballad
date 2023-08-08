@@ -2,7 +2,6 @@
     import Character from "$lib/components/game/character.svelte";
     import Tile from "$lib/components/game/tile.svelte";
 	import { useGameUtility } from "$lib/utility/game";
-	import { onMount } from "svelte";
 
     const areaSize = 3
     const game = useGameUtility(areaSize)

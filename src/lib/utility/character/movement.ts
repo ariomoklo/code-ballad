@@ -16,6 +16,8 @@ export function moveCharacter(
 		const currentTile = char[axis];
 		const moveLimit = char.moveLimit;
 
+		if (char.isDead === true) return;
+
 		// character is on 0 already, can't move up or left anymore
 		if (currentTile === 0 && direction === -1) return;
 

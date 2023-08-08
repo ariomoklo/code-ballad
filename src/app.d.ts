@@ -24,6 +24,7 @@ declare global {
 			attackRange: number;
 			onAttactState?: Direction;
 			onBoardArea?: boolean;
+			isDead?: boolean;
 		};
 	}
 }

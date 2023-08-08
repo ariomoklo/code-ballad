@@ -3,6 +3,7 @@
     import type { Writable } from "svelte/store";
 	import { fade } from "svelte/transition";
 	import Weapon from "./weapon.svelte";
+	import BlastEffect from "./blastEffect.svelte";
 
     const charSize = 34
     const tileSize = 48
@@ -22,3 +23,4 @@
 {/if}
 
 <Weapon {weapon} src="https://api.iconify.design/fluent-emoji-flat:dagger.svg?color=%23888888" />
+<BlastEffect character={chara} x={$position.x} y={$position.y} />

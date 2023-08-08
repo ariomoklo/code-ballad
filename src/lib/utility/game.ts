@@ -14,6 +14,21 @@ function generateSpawnPoints(areaSize: number, total: number) {
 		});
 }
 
+function getTileByDirection(
+	position: { x: number; y: number },
+	direction: App.Direction,
+	span = 1
+) {
+	const target = { x: position.x, y: position.y };
+	if (direction === 'UP') target.y -= span;
+	if (direction === 'DOWN') target.y += span;
+	if (direction === 'LEFT') target.x -= span;
+	if (direction === 'RIGHT') target.x += span;
+
+	if (target.x < 0 || target.y < 0) return { outbound: true, tile: target };
+	else return { outbound: false, tile: target };
+}
+
 export function useGameUtility(areaSize = 3) {
 	const characters = new Map<string, Writable<App.Chara>>();
 	const blockedTiles = writable<string[]>([]);
@@ -83,6 +98,24 @@ export function useGameUtility(areaSize = 3) {
 			if (!character) return;
 			character.update((c) => {
 				c.onAttactState = direction;
+
+				// check tile in the attact direction
+				const { outbound, tile } = getTileByDirection({ x: c.xtile, y: c.ytile }, direction);
+				if (!outbound) {
+					const enemiesPosition = get(blockedTiles);
+					if (enemiesPosition.includes(tileToString(tile))) {
+						characters.forEach((chara) => {
+							const data = get(chara);
+							if (data.xtile === tile.x && data.ytile === tile.y) {
+								blockedTiles.set(enemiesPosition.filter((e) => e !== tileToString(tile)));
+								chara.update((enemy) => {
+									enemy.isDead = true;
+									return enemy;
+								});
+							}
+						});
+					}
+				}
 
 				setTimeout(() => {
 					character.update((c) => {
