@@ -2,6 +2,7 @@
     import Character from "$lib/components/game/character.svelte";
     import Tile from "$lib/components/game/tile.svelte";
 	import { useGameUtility } from "$lib/utility/game";
+	import { onDestroy } from "svelte";
 
     const areaSize = 3
     const game = useGameUtility(areaSize)
@@ -11,9 +12,16 @@
     const mouse = game.createCharacter('mouse')
     const bird = game.createCharacter('bird')
 
-    let charid = 'cat'
+    let charid = ''
+    let aliveCharacter = ['cat', 'mouse', 'bird']
+    const unsub = game.onCharacterUpdate(char => {
+        if (char.data.isDead === true) {
+            aliveCharacter = aliveCharacter.filter(item => char.id !== item)
+        }
+    })
 
-    function onGameBoardLoad(_: any){
+    onDestroy(() => unsub())
+    function onGameBoardLoad(e: any) {
         game.spawn()
     }
 </script>
@@ -41,9 +49,9 @@
         
         <div class="p-4">
             <select class="w-full" bind:value={charid}>
-                <option value="cat" selected>Cat</option>
-                <option value="bird" selected>Bird</option>
-                <option value="mouse" selected>Mouse</option>
+                {#each aliveCharacter as id}
+                    <option value="{id}">{id.toUpperCase()}</option>
+                {/each}
             </select>
         </div>
 

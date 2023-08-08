@@ -29,6 +29,8 @@ function getTileByDirection(
 	else return { outbound: false, tile: target };
 }
 
+export type GameCharacter = { id: string; data: App.Chara };
+export type GameInstance = ReturnType<typeof useGameUtility>;
 export function useGameUtility(areaSize = 3) {
 	const characters = new Map<string, Writable<App.Chara>>();
 	const blockedTiles = writable<string[]>([]);
@@ -46,6 +48,8 @@ export function useGameUtility(areaSize = 3) {
 			})
 	);
 
+	const onUpdateSubscriber = new Set<(char: GameCharacter) => void>();
+
 	function createCharacter(id: string) {
 		const store = writable<App.Chara>({
 			attackRange: 1,
@@ -61,7 +65,14 @@ export function useGameUtility(areaSize = 3) {
 
 	return {
 		tiles,
+		characters,
 		createCharacter,
+		onCharacterUpdate(fn: (char: GameCharacter) => void) {
+			onUpdateSubscriber.add(fn);
+			return () => {
+				onUpdateSubscriber.delete(fn);
+			};
+		},
 		spawn() {
 			const spawnPoints = generateSpawnPoints(areaSize, characters.size);
 			blockedTiles.set(spawnPoints.map((p) => tileToString(p)));
@@ -87,7 +98,12 @@ export function useGameUtility(areaSize = 3) {
 		},
 		move(characterID: string): CharacterMovement {
 			const chara = characters.get(characterID);
-			if (chara) return moveCharacter(areaSize, chara, blockedTiles);
+			if (chara)
+				return moveCharacter(areaSize, chara, blockedTiles, (char) => {
+					onUpdateSubscriber.forEach((fn) => fn({ id: characterID, data: char }));
+				});
+
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			function dummy(space = 1) {
 				return;
 			}
@@ -104,7 +120,7 @@ export function useGameUtility(areaSize = 3) {
 				if (!outbound) {
 					const enemiesPosition = get(blockedTiles);
 					if (enemiesPosition.includes(tileToString(tile))) {
-						characters.forEach((chara) => {
+						characters.forEach((chara, id) => {
 							const data = get(chara);
 							if (data.xtile === tile.x && data.ytile === tile.y) {
 								blockedTiles.set(enemiesPosition.filter((e) => e !== tileToString(tile)));
@@ -112,6 +128,8 @@ export function useGameUtility(areaSize = 3) {
 									enemy.isDead = true;
 									return enemy;
 								});
+
+								onUpdateSubscriber.forEach((fn) => fn({ id, data: get(chara) }));
 							}
 						});
 					}

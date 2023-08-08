@@ -6,7 +6,8 @@ export type CharacterMovement = { up: Movement; down: Movement; left: Movement; 
 export function moveCharacter(
 	areaSize: number,
 	character: Writable<App.Chara>,
-	blockedTiles: Writable<string[]>
+	blockedTiles: Writable<string[]>,
+	onUpdate: (char: App.Chara) => void
 ): CharacterMovement {
 	const blocked = get(blockedTiles);
 	const char = get(character);
@@ -50,6 +51,8 @@ export function moveCharacter(
 		// update character position
 		character.update((char) => {
 			char[axis] = destination;
+
+			onUpdate(char);
 			return char;
 		});
 	}
